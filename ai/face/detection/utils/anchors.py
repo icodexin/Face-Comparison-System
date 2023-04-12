@@ -118,7 +118,7 @@ if __name__ == "__main__":
     box_widths = anchors[0:2, 2] - anchors[0:2, 0]
     box_heights = anchors[0:2, 3] - anchors[0:2, 1]
     for i in [0, 1]:
-        rect = plt.Rectangle([anchors[i, 0], anchors[i, 1]], box_widths[i], box_heights[i], color="r", fill=False)
+        rect = plt.Rectangle((anchors[i, 0], anchors[i, 1]), box_widths[i], box_heights[i], color="r", fill=False)
         ax.add_patch(rect)
     # 先验框中心绘制
     ax = fig.add_subplot(122)
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     box_heights = decode_bbox[0: 2, 3] - decode_bbox[0: 2, 1]
 
     for i in [0, 1]:
-        rect = plt.Rectangle([decode_bbox[i, 0], decode_bbox[i, 1]], box_widths[i], box_heights[i], color="r",
+        rect = plt.Rectangle((decode_bbox[i, 0], decode_bbox[i, 1]), box_widths[i], box_heights[i], color="r",
                              fill=False)
         plt.scatter((decode_bbox[i, 2] + decode_bbox[i, 0]) / 2, (decode_bbox[i, 3] + decode_bbox[i, 1]) / 2, color="b")
         ax.add_patch(rect)

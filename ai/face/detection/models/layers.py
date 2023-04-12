@@ -35,7 +35,7 @@ def conv_bn_no_relu(in_channels: int, out_channels: int, stride: int):
     )
 
 
-def conv_bn1x1(in_channels: int, out_channels: int, stride: int, leaky: float = 0.):
+def conv_bn1X1(in_channels: int, out_channels: int, stride: int, leaky: float = 0.):
     """
     1X1逐点卷积
     :param in_channels: 输入通道数
@@ -69,9 +69,9 @@ class FPN(nn.Module):
         if out_channels <= 64:
             leaky = 0.1
 
-        self.output1 = conv_bn1x1(in_channels_list[0], out_channels, stride=1, leaky=leaky)
-        self.output2 = conv_bn1x1(in_channels_list[1], out_channels, stride=1, leaky=leaky)
-        self.output3 = conv_bn1x1(in_channels_list[2], out_channels, stride=1, leaky=leaky)
+        self.output1 = conv_bn1X1(in_channels_list[0], out_channels, stride=1, leaky=leaky)
+        self.output2 = conv_bn1X1(in_channels_list[1], out_channels, stride=1, leaky=leaky)
+        self.output3 = conv_bn1X1(in_channels_list[2], out_channels, stride=1, leaky=leaky)
 
         self.merge1 = conv_bn(out_channels, out_channels, leaky=leaky)
         self.merge2 = conv_bn(out_channels, out_channels, leaky=leaky)
@@ -85,8 +85,8 @@ class FPN(nn.Module):
         y = list(x.values())
 
         output1 = self.output1(y[0])  # C3通道数调整
-        output2 = self.output2(y[0])  # C4通道数调整
-        output3 = self.output3(y[0])  # C5通道数调整，获得P3
+        output2 = self.output2(y[1])  # C4通道数调整
+        output3 = self.output3(y[2])  # C5通道数调整，获得P3
 
         up3 = F.interpolate(output3, size=[output2.size(2), output2.size(3)], mode='nearest')  # 上采样
         output2 = output2 + up3
@@ -116,12 +116,12 @@ class SSH(nn.Module):
         if out_channels <= 64:
             leaky = 0.1
 
-        self.conv3x3 = conv_bn_no_relu(in_channels, out_channels // 2, stride=1)
+        self.conv3X3 = conv_bn_no_relu(in_channels, out_channels // 2, stride=1)
 
-        self.conv5x5_1 = conv_bn(in_channels, out_channels // 4, stride=1, leaky=leaky)
-        self.conv5x5_2 = conv_bn_no_relu(out_channels // 4, out_channels // 4, stride=1)
+        self.conv5X5_1 = conv_bn(in_channels, out_channels // 4, stride=1, leaky=leaky)
+        self.conv5X5_2 = conv_bn_no_relu(out_channels // 4, out_channels // 4, stride=1)
 
-        self.conv7x7_2 = conv_bn(out_channels // 4, out_channels // 4, stride=1, leaky=leaky)
+        self.conv7X7_2 = conv_bn(out_channels // 4, out_channels // 4, stride=1, leaky=leaky)
         self.conv7x7_3 = conv_bn_no_relu(out_channels // 4, out_channels // 4, stride=1)
 
     def forward(self, x: torch.Tensor):
@@ -130,17 +130,17 @@ class SSH(nn.Module):
         :param x: 输入张量
         :return: 输出张量
         """
-        conv3x3 = self.conv3x3(x)
+        conv3X3 = self.conv3X3(x)
 
         # 使用2个3x3卷积代替5x5卷积
-        conv5x5_1 = self.conv5x5_1(x)
-        conv5x5 = self.conv5x5_2(conv5x5_1)
+        conv5X5_1 = self.conv5X5_1(x)
+        conv5X5 = self.conv5X5_2(conv5X5_1)
 
         # 使用3个3x3卷积代替7x7卷积
         # 注意，第一次3x3卷积共用5x5中的第一次3x3卷积
-        conv7x7_2 = self.conv7x7_2(conv5x5_1)
-        conv7x7 = self.conv7x7_3(conv7x7_2)
+        conv7X7_2 = self.conv7X7_2(conv5X5_1)
+        conv7X7 = self.conv7x7_3(conv7X7_2)
 
-        out = torch.cat([conv3x3, conv5x5, conv7x7], dim=1)
+        out = torch.cat([conv3X3, conv5X5, conv7X7], dim=1)
 
         return F.relu(out)

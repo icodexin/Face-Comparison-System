@@ -1,0 +1,28 @@
+# 是否使用 cuda
+use_cuda: false
+
+# Detection 配置
+detection_config:
+  # 主干网络，填 mobilenet 或 resnet50
+  backbone: 'mobilenet'
+  # backbone 对应模型权重路径
+  model_path: 'model_data/Retinaface_mobilenet0.25.pth'
+  # 最低置信度，大于此置信度的预测框才会被保留下来
+  confidence: 0.5
+  # 非极大值抑制参数IOU
+  nms_iou: 0.3
+  # 是否要对图片进行不失真的Resize
+  letterbox_image: true
+  # 将输入图像大小重调整为input_shape(仅 letterbox 开启时有效)
+  input_shape: [ 640, 640, 3 ] # 高度x宽度x通道数
+
+# Feature 配置
+feature_config:
+  # 主干网络，填 mobilenet 或 inception_resnetv1
+  backbone: 'mobilenet'
+  # backbone 对应模型权重路径
+  model_path: 'model_data/facenet_mobilenet.pth'
+  # 将输入图像大小重调整为input_shape
+  input_shape: [ 160, 160, 3 ] # 高度x宽度x通道数
+  # 人脸距离阈值
+  threshold: 0.9
