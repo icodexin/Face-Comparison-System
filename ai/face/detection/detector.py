@@ -3,6 +3,7 @@ import torch.nn as nn
 from ai.face.detection.models import RetinaFace
 from ai.face.detection.utils import *
 from ai.utils import ImageUtil
+from utils.logger import logger
 
 
 class FaceDetector:
@@ -54,15 +55,16 @@ class FaceDetector:
 
         # 载入模型与权值
         self.generate()
+        logger().info('Successfully initialized a Tool: Face Detector')
 
     def generate(self):
         """载入模型与权值"""
         self.net = RetinaFace(cfg=self.cfg, mode='eval').eval()
-
+        logger().info('Loading weights into state dict...')
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.net.load_state_dict(torch.load(self.model_path, map_location=device))
         self.net = self.net.eval()
-        print(f'{self.model_path} model, and classes loaded.')
+        logger().info(f'{self.model_path} model, and classes loaded.')
 
         if self.cuda:
             self.net = nn.DataParallel(self.net)

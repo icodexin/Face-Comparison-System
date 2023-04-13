@@ -85,67 +85,67 @@ class Anchors(object):
         return output
 
 
-if __name__ == "__main__":
-    from config import cfg_mnet
-    import matplotlib
-    import matplotlib.pyplot as plt
-
-    # 设定图片大小
-    cfg_mnet['image_size'] = 640
-    cfg = cfg_mnet
-
-    # 获得原始先验框
-    raw_anchors = Anchors(cfg, image_size=(cfg['image_size'], cfg['image_size'])).get_anchors()
-    # 将原始先验框坐标转换为[左上x, 左上y, 右下x, 右下y]
-    anchors = np.zeros_like(raw_anchors[:, :4])
-    anchors[:, 0] = raw_anchors[:, 0] - raw_anchors[:, 2] / 2
-    anchors[:, 1] = raw_anchors[:, 1] - raw_anchors[:, 3] / 2
-    anchors[:, 2] = raw_anchors[:, 0] + raw_anchors[:, 2] / 2
-    anchors[:, 3] = raw_anchors[:, 1] + raw_anchors[:, 3] / 2
-
-    anchors = anchors[-800:] * cfg['image_size']
-
-    # 先验框中心绘制
-    center_x = (anchors[:, 0] + anchors[:, 2]) / 2
-    center_y = (anchors[:, 1] + anchors[:, 3]) / 2
-    fig = plt.figure()
-    ax = fig.add_subplot(121)
-    plt.ylim(-300, 900)
-    plt.xlim(-300, 900)
-    ax.invert_yaxis()
-    plt.scatter(center_x, center_y)
-    # 先验框宽高绘制
-    box_widths = anchors[0:2, 2] - anchors[0:2, 0]
-    box_heights = anchors[0:2, 3] - anchors[0:2, 1]
-    for i in [0, 1]:
-        rect = plt.Rectangle((anchors[i, 0], anchors[i, 1]), box_widths[i], box_heights[i], color="r", fill=False)
-        ax.add_patch(rect)
-    # 先验框中心绘制
-    ax = fig.add_subplot(122)
-    plt.ylim(-300, 900)
-    plt.xlim(-300, 900)
-    ax.invert_yaxis()  # y轴反向
-    plt.scatter(center_x, center_y)
-
-    # 对先验框调整获得预测框
-    mbox_loc = np.random.randn(800, 4)
-    mbox_ldm = np.random.randn(800, 10)
-
-    anchors[:, :2] = (anchors[:, :2] + anchors[:, 2:]) / 2
-    anchors[:, 2:] = (anchors[:, 2:] - anchors[:, :2]) * 2
-
-    mbox_loc = torch.Tensor(mbox_loc)
-    anchors = torch.Tensor(anchors)
-    cfg_mnet['variance'] = torch.Tensor(cfg_mnet['variance'])
-    decode_bbox = decode(mbox_loc, anchors, cfg_mnet['variance'])
-
-    box_widths = decode_bbox[0: 2, 2] - decode_bbox[0: 2, 0]
-    box_heights = decode_bbox[0: 2, 3] - decode_bbox[0: 2, 1]
-
-    for i in [0, 1]:
-        rect = plt.Rectangle((decode_bbox[i, 0], decode_bbox[i, 1]), box_widths[i], box_heights[i], color="r",
-                             fill=False)
-        plt.scatter((decode_bbox[i, 2] + decode_bbox[i, 0]) / 2, (decode_bbox[i, 3] + decode_bbox[i, 1]) / 2, color="b")
-        ax.add_patch(rect)
-
-    plt.show()
+# if __name__ == "__main__":
+#     from config import cfg_mnet
+#     import matplotlib
+#     import matplotlib.pyplot as plt
+#
+#     # 设定图片大小
+#     cfg_mnet['image_size'] = 640
+#     cfg = cfg_mnet
+#
+#     # 获得原始先验框
+#     raw_anchors = Anchors(cfg, image_size=(cfg['image_size'], cfg['image_size'])).get_anchors()
+#     # 将原始先验框坐标转换为[左上x, 左上y, 右下x, 右下y]
+#     anchors = np.zeros_like(raw_anchors[:, :4])
+#     anchors[:, 0] = raw_anchors[:, 0] - raw_anchors[:, 2] / 2
+#     anchors[:, 1] = raw_anchors[:, 1] - raw_anchors[:, 3] / 2
+#     anchors[:, 2] = raw_anchors[:, 0] + raw_anchors[:, 2] / 2
+#     anchors[:, 3] = raw_anchors[:, 1] + raw_anchors[:, 3] / 2
+#
+#     anchors = anchors[-800:] * cfg['image_size']
+#
+#     # 先验框中心绘制
+#     center_x = (anchors[:, 0] + anchors[:, 2]) / 2
+#     center_y = (anchors[:, 1] + anchors[:, 3]) / 2
+#     fig = plt.figure()
+#     ax = fig.add_subplot(121)
+#     plt.ylim(-300, 900)
+#     plt.xlim(-300, 900)
+#     ax.invert_yaxis()
+#     plt.scatter(center_x, center_y)
+#     # 先验框宽高绘制
+#     box_widths = anchors[0:2, 2] - anchors[0:2, 0]
+#     box_heights = anchors[0:2, 3] - anchors[0:2, 1]
+#     for i in [0, 1]:
+#         rect = plt.Rectangle((anchors[i, 0], anchors[i, 1]), box_widths[i], box_heights[i], color="r", fill=False)
+#         ax.add_patch(rect)
+#     # 先验框中心绘制
+#     ax = fig.add_subplot(122)
+#     plt.ylim(-300, 900)
+#     plt.xlim(-300, 900)
+#     ax.invert_yaxis()  # y轴反向
+#     plt.scatter(center_x, center_y)
+#
+#     # 对先验框调整获得预测框
+#     mbox_loc = np.random.randn(800, 4)
+#     mbox_ldm = np.random.randn(800, 10)
+#
+#     anchors[:, :2] = (anchors[:, :2] + anchors[:, 2:]) / 2
+#     anchors[:, 2:] = (anchors[:, 2:] - anchors[:, :2]) * 2
+#
+#     mbox_loc = torch.Tensor(mbox_loc)
+#     anchors = torch.Tensor(anchors)
+#     cfg_mnet['variance'] = torch.Tensor(cfg_mnet['variance'])
+#     decode_bbox = decode(mbox_loc, anchors, cfg_mnet['variance'])
+#
+#     box_widths = decode_bbox[0: 2, 2] - decode_bbox[0: 2, 0]
+#     box_heights = decode_bbox[0: 2, 3] - decode_bbox[0: 2, 1]
+#
+#     for i in [0, 1]:
+#         rect = plt.Rectangle((decode_bbox[i, 0], decode_bbox[i, 1]), box_widths[i], box_heights[i], color="r",
+#                              fill=False)
+#         plt.scatter((decode_bbox[i, 2] + decode_bbox[i, 0]) / 2, (decode_bbox[i, 3] + decode_bbox[i, 1]) / 2, color="b")
+#         ax.add_patch(rect)
+#
+#     plt.show()

@@ -1,0 +1,15 @@
+log_dirpath: './logs' # 日志文件夹所在路径
+
+server: # 服务器配置
+  host: '0.0.0.0' # 主机IP
+  port: 8000 # 端口
+  reload: true # 代码更改时是否重启服务器
+
+fastapi:
+  log_format: "%(asctime)s [%(levelname)s] web server: %(message)s" # 日志格式
+  config: # 配置
+    title: "Face Comparison System API Docs" # 文档标题
+    description: "人脸比对系统 API接口文档" # 文档简介
+    version: 'v1.0.0' # 应用版本
+    docs_url: "/docs" # Swagger UI 交互式文档 url
+    redoc_url: "/redoc" # Redoc 文档 url

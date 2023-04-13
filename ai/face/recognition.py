@@ -6,12 +6,30 @@ import numpy as np
 from ai.face.detection import FaceDetector
 from ai.face.feature import FaceFeatureExtractor
 from ai.utils import print_config, FaceUtil
+from utils.utils import relpath
+from utils.logger import logger
 
 
+# Method Two：通过装饰器实现
+def singleton(cls):
+    # 创建1个字典用来保存类的实例对象
+    _instance = {}
+
+    def _singleton(*args, **kwargs):
+        # 先判断这个类有没有对象
+        if cls not in _instance:
+            _instance[cls] = cls(*args, **kwargs)  # 创建一个对象,并保存到字典当中
+        # 将实例对象返回
+        return _instance[cls]
+
+    return _singleton
+
+
+@singleton
 class FaceRecognizer(object):
     """人脸1:1识别器"""
 
-    def __init__(self, config_path: str = './config.yaml'):
+    def __init__(self, config_path: str = relpath('./config.yaml')):
         """
         初始化人脸1:1识别器
         :param config_path: 配置文件路径
@@ -21,15 +39,20 @@ class FaceRecognizer(object):
             with open(config_path, 'r', encoding='utf-8') as file:
                 config = yaml.safe_load(file)
         except FileNotFoundError:
-            print("\033[1;31m[Error]\033[0m Can not find or open config file.")
+            logger().error(f'Can not find or open config file:{config_path}')
+            exit(1)
 
         # 获取配置信息
         use_cuda = config['use_cuda']  # 是否使用Cuda
         detection_config = config['detection_config']  # 获取 detection 配置信息
         feature_config = config['feature_config']  # 获取 feature 配置信息
 
+        # 修改模型path路径为真实路径
+        detection_config['model_path'] = relpath(detection_config['model_path'])
+        feature_config['model_path'] = relpath(feature_config['model_path'])
+
         # 打印配置信息
-        print(f'use_cuda: {use_cuda}')
+        logger().info(f'use cuda: {use_cuda}')
         print_config('Face Detection Configs', detection_config)
         print_config('Feature Extractor Configs', feature_config)
 
@@ -62,7 +85,6 @@ class FaceRecognizer(object):
                 'error_code': 1,  # 多余1个人脸
             }
 
-
         # 取出唯一的人脸信息，同时对数据取整
         face_info = np.array(boxes_conf_landms[0], dtype=int)
 
@@ -88,6 +110,15 @@ class FaceRecognizer(object):
 
         return np.linalg.norm(encoding1 - encoding2)
 
+    def detect_image_encoding(self, image, encoding):
+        """
+        检测一张图片和已知人脸编码的相似度
+        :param image:
+        :param encoding:
+        :return:
+        """
+        image_encoding = self.get_face_encoding(image)
+        return np.linalg.norm(image_encoding - encoding)
 
 
 if __name__ == "__main__":

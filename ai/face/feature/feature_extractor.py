@@ -4,6 +4,7 @@ import torch.backends.cudnn as cudnn
 
 from ai.face.feature.models import FaceNet
 from ai.utils import ImageUtil
+from utils.logger import logger
 
 
 class FaceFeatureExtractor(object):
@@ -38,14 +39,15 @@ class FaceFeatureExtractor(object):
             setattr(self, name, value)
 
         self.generate()
+        logger().info('Successfully initialized a Tool: Face Feature Extractor')
 
     def generate(self):
         """载入模型与权值"""
-        print('Loading weights into state dict...')
+        logger().info('Loading weights into state dict...')
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.net = FaceNet(backbone=self.backbone, mode="predict").eval()
         self.net.load_state_dict(torch.load(self.model_path, map_location=device), strict=False)
-        print('{} model loaded.'.format(self.model_path))
+        logger().info(f'{self.model_path} model, and classes loaded.')
 
         if self.cuda:
             self.net = torch.nn.DataParallel(self.net)
