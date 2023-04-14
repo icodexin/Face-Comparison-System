@@ -73,13 +73,11 @@ class FaceRecognizer(object):
 
         # 人脸数检查
         if len(boxes_conf_landms) < 1:
-            print('error_0')
             return {
                 'success': False,  # 操作失败
                 'error_code': 0,  # 没有人脸
             }
         elif len(boxes_conf_landms) > 1:
-            print('error_1')
             return {
                 'success': False,  # 操作失败
                 'error_code': 1,  # 多余1个人脸
@@ -96,7 +94,11 @@ class FaceRecognizer(object):
         # 获取人脸编码
         encoding = self.feature_extractor.get_encoding(crop_img)
 
-        return encoding
+        return {
+            'success': True,
+            'encoding': encoding,
+            'bbox': face_info[:4].tolist()
+        }
 
     def detect_image(self, image1, image2):
         """
@@ -105,10 +107,50 @@ class FaceRecognizer(object):
         :param image2: 第2张图片
         :return: todo ?
         """
-        encoding1 = self.get_face_encoding(image1)
-        encoding2 = self.get_face_encoding(image2)
+        ret1 = self.get_face_encoding(image1)
+        if ret1['success']:
+            encoding1 = ret1['encoding']
+        elif ret1['error_code'] == 0:
+            return {
+                'success': False,
+                'error_code': 0,
+                'error_info': '第一张图片没有有效的人脸信息。'
+            }
+        else:
+            return {
+                'success': False,
+                'error_code': 1,
+                'error_info': '第一张图片的人脸数量太多了。'
+            }
+        
+        ret2 = self.get_face_encoding(image2)
+        if ret2['success']:
+            encoding2 = ret2['encoding']
+        elif ret2['error_code'] == 0:
+            return {
+                'success': False,
+                'error_code': 2,
+                'error_info': '第二张图片没有有效的人脸信息。'
+            }
+        else:
+            return {
+                'success': False,
+                'error_code': 3,
+                'error_info': '第二张图片的人脸数量太多了。'
+            }
+        
+        distance = np.linalg.norm(encoding1 - encoding2).item()
+        bbox1 = ret1['bbox']
+        bbox2 = ret2['bbox']
 
-        return np.linalg.norm(encoding1 - encoding2)
+        return {
+            'success': True,
+            'distance': distance,
+            'is_one_person': distance <= 0.9,
+            'bbox1': bbox1,
+            'bbox2': bbox2,
+        }
+    
 
     def detect_image_encoding(self, image, encoding):
         """

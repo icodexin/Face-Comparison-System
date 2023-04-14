@@ -15,7 +15,7 @@ class FaceDetector:
         # retinaface 所使用的主干网络，有 mobilenet 和 resnet50
         "backbone": "mobilenet",
         # retinaface 中只有得分大于置信度的预测框会被保留下来
-        "confidence": 0.9,
+        "confidence": 0.8,
         # retinaface 中非极大抑制所用到的nms_iou大小
         "nms_iou": 0.45,
         # 是否需要进行图像大小限制。

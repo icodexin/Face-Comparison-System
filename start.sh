@@ -5,7 +5,7 @@ reload=$(cat $config_path | shyaml get-value server.reload)
 
 uvicorn_config_path='./uvicorn_config.json'
 
-if $reload
+if [ $reload = 'True' ]
 then
   uvicorn server.fcs:app --reload --host $host --port $port --log-config $uvicorn_config_path
 else
