@@ -5,11 +5,12 @@ from typing import List
 import cv2
 import numpy as np
 import uvicorn
-from PIL.Image import Image
 from fastapi import FastAPI, UploadFile, File, Body, HTTPException, status
-from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
 from config import fastapi_config, fastapi_log_fmt, log_dirpath, server_config
 from global_var import face_recognizer
+from .user_router import user_router
+from .utils import bytes_to_numpy
 
 # 实例化web server app
 app = FastAPI(
@@ -17,6 +18,8 @@ app = FastAPI(
     description=fastapi_config['description'],
     version=fastapi_config['version'],
 )
+
+app.include_router(user_router, prefix='/user', tags=['用户管理'])
 
 # 设置FastAPI的日志格式
 log_config = uvicorn.config.LOGGING_CONFIG
@@ -52,19 +55,13 @@ def app_root():
     }
 
 
-def bytes_to_numpy(image_bytes):
-    image_np = np.frombuffer(image_bytes, dtype=np.uint8)
-    image_np2 = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
-    return image_np2
-
-
 @app.post('/detect_image')
 async def detect_image(file1: UploadFile = File(), file2: UploadFile = File()):
     if not file1.content_type.startswith("image/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File 1 is't an image.")
     if not file2.content_type.startswith("image/"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File 1 is't an image.")
-    
+
     f1 = await file1.read()
     f2 = await file2.read()
     image1 = bytes_to_numpy(f1)
@@ -74,3 +71,10 @@ async def detect_image(file1: UploadFile = File(), file2: UploadFile = File()):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=ret, headers={"X-Error": "Invalid Image"})
     else:
         return ret
+
+
+@app.get('/user_agreement')
+async def user_agreement():
+    with open("server/static/user_agreement.html", "r") as file:
+        html_content = file.read()
+    return HTMLResponse(content=html_content)

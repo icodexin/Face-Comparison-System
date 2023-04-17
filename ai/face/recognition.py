@@ -76,11 +76,13 @@ class FaceRecognizer(object):
             return {
                 'success': False,  # 操作失败
                 'error_code': 0,  # 没有人脸
+                'error_info': '该张图片没有有效的人脸信息。'
             }
         elif len(boxes_conf_landms) > 1:
             return {
                 'success': False,  # 操作失败
                 'error_code': 1,  # 多余1个人脸
+                'error_info': '该张图片的人脸数量太多了。'
             }
 
         # 取出唯一的人脸信息，同时对数据取整
@@ -96,7 +98,7 @@ class FaceRecognizer(object):
 
         return {
             'success': True,
-            'encoding': encoding,
+            'encoding': encoding.tolist(),
             'bbox': face_info[:4].tolist()
         }
 

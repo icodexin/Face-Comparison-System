@@ -1,0 +1,22 @@
+-- Create FCS database
+CREATE DATABASE IF NOT EXISTS FCS;
+
+-- Use FCS database
+USE FCS;
+
+-- Create User table
+CREATE TABLE IF NOT EXISTS User (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL
+);
+
+-- Create UserData table
+CREATE TABLE IF NOT EXISTS UserData (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    image LONGBLOB NOT NULL,
+    bbox VARCHAR(1000) NOT NULL, 
+    encoding VARCHAR(5000) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES User(id)
+);
