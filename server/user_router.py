@@ -131,11 +131,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {"access_token": access_token, "token_type": "Bearer"}
 
 
-@user_router.get("/me", response_model=schemas.ReadUser)
+@user_router.get("/me", response_model=schemas.ReadUserWithImage)
 def read_user_me(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     user_data = crud.get_user_data(db=db, user_id=current_user.id)
     user_image_base64 = utils.bytes_to_base64(user_data.image)
-    me = schemas.ReadUser(
+    me = schemas.ReadUserWithImage(
         id=current_user.id,
         name=current_user.name,
         image=user_image_base64,

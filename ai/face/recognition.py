@@ -140,7 +140,10 @@ class FaceRecognizer(object):
                 'error_code': 3,
                 'error_info': '第二张图片的人脸数量太多了。'
             }
-        
+
+        encoding1 = np.array(encoding1)
+        encoding2 = np.array(encoding2)
+
         distance = np.linalg.norm(encoding1 - encoding2).item()
         bbox1 = ret1['bbox']
         bbox2 = ret2['bbox']

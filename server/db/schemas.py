@@ -24,10 +24,14 @@ class ReadUser(BaseModel):
     """读取用户"""
     id: int
     name: str
-    image: str  # base64
 
     class Config:
         orm_mode = True
+
+
+class ReadUserWithImage(ReadUser):
+    """读取用户并附上照片"""
+    image: str  # base64
 
 
 class CreateUserData(BaseModel):
