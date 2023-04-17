@@ -160,7 +160,15 @@ def update_password(request: schemas.UpdatePasswordRequest, current_user: models
 def update_image(request: schemas.UpdateImageRequest, current_user: models.User = Depends(get_current_user),
                  db: Session = Depends(get_db)):
     user_data = crud.get_user_data(db, current_user.id)
-    user_data.image = utils.base64_to_bytes(request.image_base64)
+
+    # 检测图片是否有人脸
+    image_bytes = utils.base64_to_bytes(request.image_base64)
+    image_ndarray = utils.bytes_to_numpy(image_bytes)
+    res = face_recognizer.get_face_encoding(image_ndarray)
+    if not res['success']:
+        raise HTTPException(status_code=400, detail=res['error_info'])
+
+    user_data.image = image_bytes
     db.commit()
 
     return {"message": "Image updated successfully"}
