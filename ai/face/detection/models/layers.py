@@ -86,7 +86,7 @@ class FPN(nn.Module):
 
         output1 = self.output1(y[0])  # C3通道数调整
         output2 = self.output2(y[1])  # C4通道数调整
-        output3 = self.output3(y[2])  # C5通道数调整，获得P3
+        output3 = self.output3(y[2])  # C5通道数调整，获得P5
 
         up3 = F.interpolate(output3, size=[output2.size(2), output2.size(3)], mode='nearest')  # 上采样
         output2 = output2 + up3
@@ -94,7 +94,7 @@ class FPN(nn.Module):
 
         up2 = F.interpolate(output2, size=[output1.size(2), output1.size(3)], mode='nearest')  # 上采样
         output1 = output1 + up2
-        output1 = self.merge1(output1)  # 特征融合，获得P5
+        output1 = self.merge1(output1)  # 特征融合，获得P3
 
         return [output1, output2, output3]  # 传回[P3, P4, P5]
 

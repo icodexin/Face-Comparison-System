@@ -31,5 +31,5 @@ def dict_to_list(dictionary):
     """
     Converts a dictionary to a list of tuples.
     """
-    lst = [(key, value) for key, value in dictionary.items()]
+    lst = [value for key, value in dictionary.items()]
     return lst

@@ -160,12 +160,28 @@ class FaceRecognizer(object):
     def detect_image_encoding(self, image, encoding):
         """
         检测一张图片和已知人脸编码的相似度
-        :param image:
-        :param encoding:
-        :return:
+        :param image: 输入图片
+        :param encoding: 已知的人脸编码
+        :return: json
         """
-        image_encoding = self.get_face_encoding(image)
-        return np.linalg.norm(image_encoding - encoding)
+        ret = self.get_face_encoding(image)
+        if ret['success']:
+            image_encoding = ret['encoding']
+            bbox = ret['bbox']
+        else:
+            return ret
+        
+        encoding1 = np.array(image_encoding)
+        encoding2 = np.array(encoding)
+
+        distance = np.linalg.norm(encoding1 - encoding2).item()
+        
+        return {
+            'success': True,
+            'distance': distance,
+            'is_one_person': distance <= 0.9,
+            'bbox': bbox,
+        }
 
 
 if __name__ == "__main__":

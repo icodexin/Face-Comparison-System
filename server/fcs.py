@@ -1,16 +1,12 @@
 import logging
 import logging.handlers
-from typing import List
 
-import cv2
-import numpy as np
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Body, HTTPException, status
 from fastapi.responses import HTMLResponse
 from config import fastapi_config, fastapi_log_fmt, log_dirpath, server_config
-from global_var import face_recognizer
+from .ai_router import ai_router
 from .user_router import user_router
-from .utils import bytes_to_numpy
 
 # 实例化web server app
 app = FastAPI(
@@ -20,6 +16,7 @@ app = FastAPI(
 )
 
 app.include_router(user_router, prefix='/user', tags=['用户管理'])
+app.include_router(ai_router, prefix='/ai', tags=['AI模块'])
 
 # 设置FastAPI的日志格式
 log_config = uvicorn.config.LOGGING_CONFIG
@@ -53,24 +50,6 @@ def app_root():
     return {
         "api_doc_url": fastapi_config['docs_url']
     }
-
-
-@app.post('/detect_image')
-async def detect_image(file1: UploadFile = File(), file2: UploadFile = File()):
-    if not file1.content_type.startswith("image/"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File 1 is't an image.")
-    if not file2.content_type.startswith("image/"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File 1 is't an image.")
-
-    f1 = await file1.read()
-    f2 = await file2.read()
-    image1 = bytes_to_numpy(f1)
-    image2 = bytes_to_numpy(f2)
-    ret = face_recognizer.detect_image(image1, image2)
-    if ret['success'] == False:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=ret, headers={"X-Error": "Invalid Image"})
-    else:
-        return ret
 
 
 @app.get('/user_agreement')

@@ -106,6 +106,7 @@ class FaceDetector:
             #  传入网络进行预测
             loc, conf, landms = self.net(image)
 
+
             #  对预测框进行解码
             boxes = decode(loc.data.squeeze(0), self.anchors, self.cfg['variance'])
             #  获得预测结果的置信度

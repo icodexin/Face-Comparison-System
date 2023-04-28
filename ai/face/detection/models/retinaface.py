@@ -30,7 +30,7 @@ class ClassHead(nn.Module):
         """
         out = self.conv1x1(x)  # 调整通道数
         out = out.permute(0, 2, 3, 1).contiguous()  # 将通道调整至最后一维
-        return out.view(out.shape[0], -1, 2)  # [batch_size, num_anchors, is_contain_face?]
+        return out.view(out.shape[0], -1, 2)  # [batch_size, num_anchors, [不包含人脸置信度，包含人脸置信度]]
 
 
 class BboxHead(nn.Module):
